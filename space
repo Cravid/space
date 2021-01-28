@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+usage="$(basename "$0") OPTIONS [path] -- show available free disk space
+
+OPTIONS:
+    -h          Show this help message
+
+FUNCTION:
+    path        Path to check free space for, default current directory
+"
+usage() {
+    echo "$usage"
+    exit 1
+}
+
+ROOT=.
+
+for option in "$@"
+do
+    case $option in
+        -h|--help) usage;;
+        -*|--*|\?) printf "illegal option: %s\n\n" "$option" >&2; usage;;
+    esac
+done
+
+if [ $# -gt 1 ]; then
+    usage
+elif [ ! -z "$1" ]; then
+    ROOT=$1
+fi
+
+##
+
+#df -Ph $ROOT | awk 'NR==2{print $4}'
+
+##
+# This approach gets more to the same result as
+# macOS System Information Storage Management, thus I go
+# with this approach
+##
+SPACE=`df -P $ROOT | awk 'NR==2{print $4}'`
+humanise $(($SPACE * 512))
+
+exit $?
